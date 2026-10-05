@@ -102,3 +102,15 @@ make notebook
 ```
 
 `make final` scores the held-out test period and should be run once, after `make train`. All seeds are fixed (42), and training uses LightGBM's deterministic mode.
+
+## Contact
+
+From [Yashasvi Jaiswal](https://yashjswl.com).
+
+LinkedIn: [linkedin.com/in/yashjswl](https://www.linkedin.com/in/yashjswl/)
+
+Email: [hello@yashjswl.com](mailto:hello@yashjswl.com)
+
+---
+
+&copy; 2026 Yashasvi Jaiswal. All rights reserved.
