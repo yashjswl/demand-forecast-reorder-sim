@@ -4,6 +4,10 @@ This project forecasts daily unit sales seven days ahead for 100 SKUs in one sto
 
 The data is M5 (Walmart) retail sales, used as a stand-in for dark-store demand. It is not quick-commerce data, and the conclusions should be read with that in mind.
 
+## Summary
+
+On a held-out 91-day test period, LightGBM reaches a WAPE of 0.683 against 0.725 for a 28-day moving average, the strongest baseline, a gain of about 6%. The gain comes mostly from fast-selling SKUs; for intermittent SKUs the two are effectively tied. In a simulated reorder comparison, a P90-based policy fills 97.0% of demand against 74.5% for the moving-average policy, but it holds about three times the stock, and at equal inventory its advantage is between 0.1 and 2.3 points of fill rate.
+
 ## Data and slice rule
 
 I used store CA_1 from M5, daily sales from 2011-01-29 to 2016-05-22. The 100 SKUs are picked by a rule that only looks at the year before the first validation fold: an item must have been selling before that year and sold at least once in it. Items with zero sales on at least half of the days are intermittent; the rest are split at the median daily volume into fast and medium. I drew 34 fast, 33 medium and 33 intermittent SKUs at random with a fixed seed.
@@ -42,6 +46,8 @@ Mean of the three validation folds, for comparison:
 | Medium | 0.855 | 0.877 | 1.066 | 1.081 |
 | Intermittent | 1.200 | 1.183 | 1.404 | 1.393 |
 
+![Test-period WAPE by segment](reports/wape_by_segment.png)
+
 The best simple baseline is the 28-day moving average, and the model beats it by about 6% (relative) overall on the test period, mostly in the fast segment. The gain is modest. On the 91 test days LightGBM has the lower WAPE for 70 of the 100 SKUs (28 of 34 fast, 23 of 33 medium, 19 of 33 intermittent), so it is not a uniform win.
 
 In the intermittent segment the model does not clearly beat the moving average. It is marginally better on the test period (1.100 against 1.110) and worse on average over the validation folds (1.200 against 1.183), with a higher bias in validation (+6.4% against -2.0%). I would treat that segment as a tie. WAPE above 1.0 there means that predicting zero on every day would score better on WAPE, which is a property of the metric on sparse series and not evidence the forecasts are useless; MAE for the segment is 0.668 against 0.674.
@@ -64,6 +70,8 @@ This part is a simulation. No inventory, supplier or cost data exists; the assum
 
 The P90 policy fills far more demand but holds about three times the stock of the moving-average policy, so the raw comparison mostly shows the cost of more inventory. To separate stock level from forecast quality, I scaled each policy's order-up-to level and compared fill rates at the same average inventory ([chart](reports/simulation_tradeoff.png)). On that basis the differences are small. The P90 policy at 0.8 of its level holds 4.20 units and fills 93.2%, against 90.9% for the moving average at the same inventory, a gain of 2.3 points. At lower stock the gap is about 0.1 points. The P50 policy sits 0.2 to 1.5 points above the moving-average curve at equal inventory. The P90 policy as specified, at 5.86 units, is beyond the range the moving-average runs reach, so it cannot be compared directly at that point.
 
+![Simulated fill rate against average inventory](reports/simulation_tradeoff.png)
+
 The P90 level adds daily P90 forecasts over the lead time, which overstates the P90 of the total, so that policy is conservative by construction. These results come from one 91-day window and one store.
 
 ## Limitations
@@ -73,6 +81,10 @@ This is a single store, and the SKUs were a stratified sample of 100 items from 
 Sales are censored: when an item was out of stock the recorded sales understate demand, and nothing here corrects for it. The model and the simulation both treat observed sales as demand, so the fill rates are optimistic about what true demand would be. The lead time, review period, starting stock and the lost-sales rule are assumed, not observed, and there are no real costs, so there is no profit or holding-cost analysis, only fill rate, stockout days and inventory. The policy comparison is simulated end to end.
 
 The price feature assumes prices are known a week ahead. New SKUs are not handled: the features need 56 days of history, so a new item would get no forecast until then. Validation scores were used to choose the model settings, so they are slightly optimistic; the test results are the clean ones.
+
+## Repository layout
+
+`src/` holds the pipeline (`data_prep.py`, `features.py`, `baselines.py`, `train.py`, `evaluate.py`, `simulate_reorder.py`), `tests/` the leakage, metric and simulation tests, and `docs/` the assumptions and metric definitions. `notebooks/analysis.ipynb` has the narrative and charts, and `reports/` the result files and charts.
 
 ## Reproduce
 
