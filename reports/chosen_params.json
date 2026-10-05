@@ -1,0 +1,5 @@
+{
+  "objective": "tweedie",
+  "num_leaves": 63,
+  "min_child_samples": 300
+}
