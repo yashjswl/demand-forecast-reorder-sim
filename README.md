@@ -76,7 +76,7 @@ The price feature assumes prices are known a week ahead. New SKUs are not handle
 
 ## Reproduce
 
-Download the M5 files (`sales_train_evaluation.csv`, `calendar.csv`, `sell_prices.csv`) from Kaggle into `data/raw/`. The code was run with Python 3.12; dependency versions are pinned in `requirements.txt`.
+Download the M5 files (`sales_train_evaluation.csv`, `calendar.csv`, `sell_prices.csv`) from Kaggle into `data/raw/`, which `make setup` creates. The code was run with Python 3.12; dependency versions are pinned in `requirements.txt`.
 
 ```bash
 make setup

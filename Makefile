@@ -3,6 +3,7 @@ PY = .venv/bin/python
 setup:
 	python3 -m venv .venv
 	.venv/bin/pip install -r requirements.txt
+	mkdir -p data/raw
 
 prep:
 	$(PY) -m src.data_prep
